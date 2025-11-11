@@ -3,9 +3,11 @@
 import { useApp } from "@/context/AppContext";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
+import { FaUsers, FaUserTie, FaHome, FaHeart } from "react-icons/fa";
 
 export default function MerchantDashboard() {
-  const { merchantToken, agent, agentToken, BASE_URL, merchant } = useApp();
+  const { merchantToken, agent, agentToken, BASE_URL, merchant, theme } = useApp();
   const [overview, setOverview] = useState({
     agents: 0,
     users: 0,
@@ -21,7 +23,7 @@ export default function MerchantDashboard() {
 
     const fetchOverview = async () => {
       try {
-        const [agentsRes, usersRes, wishRes, propsRes] = await Promise.all([
+        const [agentsRes, usersRes, propsRes, wishRes] = await Promise.all([
           axios.get(`${BASE_URL}/merchants/agents?offset=0&limit=50`, {
             headers: { Authorization: `Bearer ${merchantToken}` },
           }),
@@ -44,6 +46,7 @@ export default function MerchantDashboard() {
           wishlists: wishRes.data?.data?.length || 0,
         });
       } catch (error) {
+        toast.error(error.message || "Error fetching overview data");
         console.log("Overview fetch error:", error);
       }
     };
@@ -51,39 +54,40 @@ export default function MerchantDashboard() {
     fetchOverview();
   }, [merchantToken, merchant, agentToken, agent]);
 
+  const cards = [
+    { title: "Agents", value: overview.agents, icon: <FaUserTie size={24} />, color: "bg-green-100 text-green-500" },
+    { title: "Users", value: overview.users, icon: <FaUsers size={24} />, color: "bg-blue-100 text-blue-500" },
+    { title: "Properties", value: overview.properties, icon: <FaHome size={24} />, color: "bg-purple-100 text-purple-500" },
+    { title: "Wishlists", value: overview.wishlists, icon: <FaHeart size={24} />, color: "bg-red-100 text-red-500" },
+  ];
+
   return (
-    <div className="p-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-6">
-        <DashboardCard
-          title="Agents"
-          value={overview.agents}
-          color="bg-green-500"
-        />
-        <DashboardCard
-          title="Users"
-          value={overview.users}
-          color="bg-blue-500"
-        />
-        <DashboardCard
-          title="Properties"
-          value={overview.properties}
-          color="bg-purple-500"
-        />
-        <DashboardCard
-          title="Wishlists"
-          value={overview.wishlists}
-          color="bg-red-500"
-        />
+    <div className="p-6 md:p-8 space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        {cards.map((c) => (
+          <DashboardCard key={c.title} title={c.title} value={c.value} icon={c.icon} color={c.color} theme={theme} />
+        ))}
       </div>
     </div>
   );
 }
 
-function DashboardCard({ title, value, color }) {
+function DashboardCard({ title, value, icon, color, theme }) {
   return (
-    <div className={`p-6 text-white rounded-xl shadow-md ${color}`}>
-      <h2 className="text-lg">{title}</h2>
-      <p className="text-3xl font-bold">{value}</p>
+    <div
+      className={`flex justify-between items-center p-5 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 ${
+        theme === "dark" ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
+      }`}
+    >
+      <div>
+        <p className="text-sm text-gray-400">{title}</p>
+        <h3 className="text-2xl md:text-3xl font-bold mt-1">{value}</h3>
+      </div>
+      <div
+        className={`p-3 rounded-lg flex items-center justify-center text-2xl ${color} shadow-sm`}
+      >
+        {icon}
+      </div>
     </div>
   );
 }

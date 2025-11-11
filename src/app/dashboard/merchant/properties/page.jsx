@@ -134,7 +134,7 @@ export default function AgentProperties() {
     <div className="p-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-semibold text-[#2b2340]">Properties</h1>
+        <h1 className="text-2xl font-semibold">Properties</h1>
         <Link
           href="/dashboard/agent/properties/create"
           className="flex items-center gap-2 bg-blue-950 text-white px-4 py-2 rounded-md hover:bg-blue-900 transition-all duration-300"

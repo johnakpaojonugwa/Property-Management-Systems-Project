@@ -15,6 +15,7 @@ import {
 } from "react-icons/fa";
 import { IoMdHeart } from "react-icons/io";
 import { MdRealEstateAgent } from "react-icons/md";
+import { LiaSpinnerSolid } from "react-icons/lia";
 
 export default function UserLayout({ children }) {
   const router = useRouter();
@@ -32,24 +33,43 @@ export default function UserLayout({ children }) {
 
   if (loadingUser || !user)
     return (
-      <div className="flex justify-center items-center min-h-[60vh] text-gray-600">
-        Loading...
+      <div className="flex justify-center items-center min-h-[40vh]">
+        <LiaSpinnerSolid className="animate-spin text-[#3A2B66]" size={50} />
       </div>
     );
 
-  const userName =
-    user?.full_name
-      ? user.full_name
-      : user?.first_name
-      ? `${user.first_name} ${user.last_name || ""}`
-      : "User";
+  const userName = user?.full_name
+    ? user.full_name
+    : user?.first_name
+    ? `${user.first_name} ${user.last_name || ""}`
+    : "User";
 
   const navLinks = [
-    { href: "/dashboard/user", label: "Dashboard", icon: <FaTachometerAlt size={20} /> },
-    { href: "/dashboard/user/properties", label: "My Properties", icon: <FaHome size={20} /> },
-    { href: "/dashboard/user/wishlists", label: "Wishlists", icon: <IoMdHeart size={20} /> },
-    { href: "/dashboard/user/appointments", label: "Appointments", icon: <FaCalendarAlt size={20} /> },
-    { href: "/dashboard/user/profile", label: "Profile", icon: <FaUser size={20} /> },
+    {
+      href: "/dashboard/user",
+      label: "Dashboard",
+      icon: <FaTachometerAlt size={20} />,
+    },
+    {
+      href: "/dashboard/user/properties",
+      label: "My Properties",
+      icon: <FaHome size={20} />,
+    },
+    {
+      href: "/dashboard/user/wishlists",
+      label: "Wishlists",
+      icon: <IoMdHeart size={20} />,
+    },
+    {
+      href: "/dashboard/user/appointments",
+      label: "Appointments",
+      icon: <FaCalendarAlt size={20} />,
+    },
+    {
+      href: "/dashboard/user/profile",
+      label: "Profile",
+      icon: <FaUser size={20} />,
+    },
   ];
 
   const handleLogout = () => {
@@ -58,16 +78,26 @@ export default function UserLayout({ children }) {
   };
 
   // Sidebar classes
-  const sidebarBg = theme === "dark" ? "bg-gray-900 text-gray-100" : "bg-white text-gray-800";
+  const sidebarBg =
+    theme === "dark" ? "bg-gray-900 text-gray-100" : "bg-white text-gray-800";
   const sidebarLinkActive = "bg-blue-600 text-white";
   const sidebarLinkInactive =
-    theme === "dark" ? "text-gray-300 hover:bg-gray-700" : "text-gray-700 hover:bg-blue-100";
+    theme === "dark"
+      ? "text-gray-300 hover:bg-gray-700"
+      : "text-gray-700 hover:bg-blue-100";
 
   return (
-    <div className={`${theme === "dark" ? "bg-gray-800 text-gray-100" : "bg-gray-100 text-gray-900"} flex min-h-screen transition-colors duration-300`}>
-      
-      {/* ===== Desktop Sidebar ===== */}
-      <aside className={`hidden md:flex w-64 flex-col justify-between p-4 shadow-lg sticky  ${sidebarBg}`}>
+    <div
+      className={`${
+        theme === "dark"
+          ? "bg-gray-800 text-gray-100"
+          : "bg-gray-100 text-gray-900"
+      } flex min-h-screen transition-colors duration-300`}
+    >
+      {/* Desktop Sidebar */}
+      <aside
+        className={`hidden md:flex w-64 flex-col justify-between p-4 shadow-lg sticky  ${sidebarBg}`}
+      >
         <div>
           <div className="text-center p-2 flex flex-row items-center gap-2">
             <MdRealEstateAgent size={32} />
@@ -80,7 +110,9 @@ export default function UserLayout({ children }) {
                 key={link.href}
                 href={link.href}
                 className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
-                  pathname === link.href ? sidebarLinkActive : sidebarLinkInactive
+                  pathname === link.href
+                    ? sidebarLinkActive
+                    : sidebarLinkInactive
                 }`}
               >
                 {link.icon}
@@ -99,18 +131,22 @@ export default function UserLayout({ children }) {
         </button>
       </aside>
 
-      {/* ===== Mobile Overlay ===== */}
+      {/* Mobile Overlay */}
       <div
         className={`fixed inset-0 bg-black/40 z-40 md:hidden transition-opacity ${
-          mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          mobileOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setMobileOpen(false)}
       />
 
-      {/* ===== Mobile Sidebar ===== */}
+      {/* Mobile Sidebar */}
       <aside
         className={`fixed top-0 left-0 h-full w-64 z-50 transform transition-transform md:hidden flex flex-col justify-between p-4 rounded-r-xl shadow-lg ${
-          theme === "dark" ? "bg-gray-900 text-gray-100" : "bg-white text-gray-800"
+          theme === "dark"
+            ? "bg-gray-900 text-gray-100"
+            : "bg-white text-gray-800"
         } ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div>
@@ -130,7 +166,9 @@ export default function UserLayout({ children }) {
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
-                  pathname === link.href ? sidebarLinkActive : sidebarLinkInactive
+                  pathname === link.href
+                    ? sidebarLinkActive
+                    : sidebarLinkInactive
                 }`}
               >
                 {link.icon}
@@ -148,7 +186,7 @@ export default function UserLayout({ children }) {
         </button>
       </aside>
 
-      {/* ===== Main Content ===== */}
+      {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
         {/* Header */}
         <header
@@ -171,16 +209,21 @@ export default function UserLayout({ children }) {
           <div className="flex items-center gap-4">
             <div
               className={`flex items-center rounded-full shadow px-4 py-2 text-sm ${
-                theme === "dark" ? "bg-gray-700 text-gray-200" : "bg-gray-100 text-gray-800"
+                theme === "dark"
+                  ? "bg-gray-700 text-gray-200"
+                  : "bg-gray-100 text-gray-800"
               }`}
             >
-              👋 Welcome back, <span className="font-medium ml-1">{userName}</span>
+              👋 Welcome back,{" "}
+              <span className="font-medium ml-1">{userName}</span>
             </div>
 
             <button
               onClick={toggleTheme}
               className={`p-2 rounded-full transition ${
-                theme === "dark" ? "bg-gray-700 hover:bg-gray-600 text-yellow-400" : "bg-gray-200 hover:bg-gray-300 text-gray-800"
+                theme === "dark"
+                  ? "bg-gray-700 hover:bg-gray-600 text-yellow-400"
+                  : "bg-gray-200 hover:bg-gray-300 text-gray-800"
               }`}
             >
               {theme === "dark" ? "☀️" : "🌙"}
@@ -190,9 +233,13 @@ export default function UserLayout({ children }) {
 
         {/* Page content */}
         <div className="p-6 md:p-8">
-          <div className={`rounded-xl p-6 shadow-md transition-colors duration-300 ${
-            theme === "dark" ? "bg-gray-900 text-gray-100" : "bg-white text-gray-800"
-          }`}>
+          <div
+            className={`rounded-xl p-6 shadow-md transition-colors duration-300 ${
+              theme === "dark"
+                ? "bg-gray-900 text-gray-100"
+                : "bg-white text-gray-800"
+            }`}
+          >
             {children}
           </div>
         </div>
@@ -200,15 +247,6 @@ export default function UserLayout({ children }) {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
 
 // "use client";
 
@@ -408,8 +446,3 @@ export default function UserLayout({ children }) {
 //     </div>
 //   );
 // }
-
-
-
-
-

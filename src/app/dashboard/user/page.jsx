@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -66,16 +65,13 @@ export default function UserDashboard() {
     }
   }, [userToken, userId]);
 
-  // Skeleton loader
   const SkeletonGrid = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {[...Array(4)].map((_, i) => (
         <div
           key={i}
           className={`border rounded-2xl shadow-sm animate-pulse ${
-            theme === "dark"
-              ? "bg-gray-800 border-gray-700"
-              : "bg-white border-gray-100"
+            theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"
           }`}
         >
           <div className="w-full h-56 rounded-t-2xl bg-gray-200"></div>
@@ -90,24 +86,19 @@ export default function UserDashboard() {
   );
 
   return (
-    <div className="p-6 md:p-8">
-      {/* Modern Overview Cards: Text Left, Icon Right */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="p-6 md:p-8 space-y-8">
+      {/* ===== Overview Cards ===== */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Total Properties Card */}
         <div
           className={`flex justify-between items-center p-5 rounded-xl shadow-md hover:shadow-lg ${
-            theme === "dark"
-              ? "bg-gray-800 text-gray-100"
-              : "bg-white text-gray-800"
+            theme === "dark" ? "bg-gray-800 text-gray-100" : "bg-gray-100 text-gray-800"
           }`}
         >
-          {/* Left side: Text */}
           <div>
             <p className="text-sm text-gray-400">Total Properties</p>
             <h3 className="text-2xl font-bold">{properties.length}</h3>
           </div>
-
-          {/* Right side: Icon with background */}
           <div className="p-3 rounded-md bg-blue-100 text-blue-500 flex items-center justify-center">
             <FaHome size={24} />
           </div>
@@ -116,18 +107,15 @@ export default function UserDashboard() {
         {/* Wishlists Card */}
         <div
           className={`flex justify-between items-center p-5 rounded-xl shadow-md hover:shadow-lg ${
-            theme === "dark"
-              ? "bg-gray-800 text-gray-100"
-              : "bg-white text-gray-800"
+            theme === "dark" ? "bg-gray-800 text-gray-100" : "bg-gray-100 text-gray-800"
           }`}
         >
           <div>
             <p className="text-sm text-gray-400">Wishlists</p>
             <h3 className="text-2xl font-bold">{wishlists.length}</h3>
           </div>
-
           <div className="p-3 rounded-md bg-green-100 text-green-500 flex items-center justify-center">
-            <FaHeart  size={24} />
+            <FaHeart size={24} />
           </div>
         </div>
       </div>
@@ -136,9 +124,15 @@ export default function UserDashboard() {
         <SkeletonGrid />
       ) : (
         <>
-          {/* My Properties */}
-          <section className="mb-10">
-            <h2 className="text-lg font-semibold mb-4">My Properties</h2>
+          {/* My Properties Card Wrapper */}
+          <div
+            className={`p-6 rounded-2xl shadow-md transition-colors duration-300 ${
+              theme === "dark" ? "bg-gray-800 text-gray-100" : "bg-gray-100 text-gray-900"
+            }`}
+          >
+            <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+              <FaHome className="text-blue-500" /> My Properties
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {properties.length > 0 ? (
                 properties.map((p) => (
@@ -159,11 +153,17 @@ export default function UserDashboard() {
                 <p className="text-gray-500">No properties found.</p>
               )}
             </div>
-          </section>
+          </div>
 
-          {/* My Wishlists */}
-          <section>
-            <h2 className="text-lg font-semibold mb-4">My Wishlists</h2>
+          {/* My Wishlists Card Wrapper */}
+          <div
+            className={`p-6 rounded-2xl shadow-md transition-colors duration-300 ${
+              theme === "dark" ? "bg-gray-800 text-gray-100" : "bg-gray-100 text-gray-900"
+            }`}
+          >
+            <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+              <FaHeart className="text-green-500" /> My Wishlists
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {wishlists.length > 0 ? (
                 wishlists.map((w) => (
@@ -172,9 +172,7 @@ export default function UserDashboard() {
                     id={w.property?.id}
                     imageSrc={w.property?.image || "/placeholder.jpg"}
                     title={w.property?.name}
-                    location={`${w.property?.city || ""}, ${
-                      w.property?.state || ""
-                    }`}
+                    location={`${w.property?.city || ""}, ${w.property?.state || ""}`}
                     price={`₦${Number(w.property?.price)?.toLocaleString()}`}
                     bedrooms={w.property?.bedroom || 0}
                     bathrooms={w.property?.bathroom || 0}
@@ -186,13 +184,12 @@ export default function UserDashboard() {
                 <p className="text-gray-500">No wishlists found.</p>
               )}
             </div>
-          </section>
+          </div>
         </>
       )}
     </div>
   );
 }
-
 
 
 
