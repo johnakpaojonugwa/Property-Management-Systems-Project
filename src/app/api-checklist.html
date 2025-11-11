@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Project Checklist</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      color: #222;
+      margin: 0;
+      padding: 20px;
+    }
+    h1, h2 {
+      color: #1d4ed8;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    section {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin: 6px 0;
+      cursor: pointer;
+    }
+    input[type="checkbox"] {
+      margin-right: 10px;
+      transform: scale(1.2);
+    }
+  </style>
+</head>
+<body>
+  <h1>🏗️ API Project Checklist</h1>
+
+  <section id="auth">
+    <h2>🎭 Authentication System</h2>
+    <label><input type="checkbox"> POST /auth/login</label>
+    <label><input type="checkbox"> POST /users</label>
+    <label><input type="checkbox"> POST /merchants</label>
+    <label><input type="checkbox"> POST /agents</label>
+    <label><input type="checkbox"> Login page (shared)</label>
+    <label><input type="checkbox"> Register page (per role)</label>
+    <label><input type="checkbox"> Store + reuse JWT token</label>
+  </section>
+
+  <section id="profile">
+    <h2>👤 Profile Management</h2>
+    <label><input type="checkbox"> UserProfile (GET /users/:id)</label>
+    <label><input type="checkbox"> AgentProfile (GET /agents)</label>
+    <label><input type="checkbox"> MerchantProfile (GET /merchants)</label>
+    <label><input type="checkbox"> Editable profile info</label>
+    <label><input type="checkbox"> Avatar upload</label>
+  </section>
+
+  <section id="property">
+    <h2>🏠 Property Management</h2>
+    <label><input type="checkbox"> Create property (POST /properties)</label>
+    <label><input type="checkbox"> Edit property (PUT /properties/:id)</label>
+    <label><input type="checkbox"> Upload images (PUT /properties/:id/resource)</label>
+    <label><input type="checkbox"> Delete property (DELETE /properties/:id)</label>
+    <label><input type="checkbox"> Verify property (Merchant only)</label>
+    <label><input type="checkbox"> View public properties</label>
+    <label><input type="checkbox"> Buy property (POST /properties/buy)</label>
+    <label><input type="checkbox"> Add to wishlist (POST /users/wishlist)</label>
+    <label><input type="checkbox"> Review property (POST /reviews)</label>
+    <label><input type="checkbox"> Merchant properties page</label>
+    <label><input type="checkbox"> Agent properties page</label>
+    <label><input type="checkbox"> Single property view page</label>
+    <label><input type="checkbox"> Create property page</label>
+  </section>
+
+  <section id="merchant-agent">
+    <h2>🧑‍💼 Merchant–Agent Relationship</h2>
+    <label><input type="checkbox"> View agents (GET /merchants/agents)</label>
+    <label><input type="checkbox"> Create agent (POST /merchants/agents)</label>
+    <label><input type="checkbox"> Verify agent (POST /merchants/verify-agent)</label>
+    <label><input type="checkbox"> “My Agents” page</label>
+    <label><input type="checkbox"> “Add Agent” form</label>
+    <label><input type="checkbox"> “Verify Agent” toggle</label>
+  </section>
+
+  <section id="appointments">
+    <h2>📅 Appointments System</h2>
+    <label><input type="checkbox"> Get agent appointments (GET /appointments?agent=:id)</label>
+    <label><input type="checkbox"> Create appointment (POST /appointments)</label>
+    <label><input type="checkbox"> Confirm meeting (PUT /appointments/:id/confirm-meeting)</label>
+    <label><input type="checkbox"> Complete (agent) (PUT /appointments/:id/set-agent-appointment-completion)</label>
+    <label><input type="checkbox"> Complete (user) (PUT /appointments/:id/set-user-appointment-completion)</label>
+    <label><input type="checkbox"> Appointments page</label>
+    <label><input type="checkbox"> Appointment form (on property page)</label>
+  </section>
+
+  <section id="wishlist">
+    <h2>🧾 Wishlist & Reviews</h2>
+    <label><input type="checkbox"> Add to wishlist (POST /users/wishlist)</label>
+    <label><input type="checkbox"> View wishlist (GET /users/:user_id/wishlist)</label>
+    <label><input type="checkbox"> Add review (POST /reviews)</label>
+    <label><input type="checkbox"> View reviews (GET /reviews?property_id=:id)</label>
+    <label><input type="checkbox"> Wishlist page</label>
+    <label><input type="checkbox"> Reviews section under property</label>
+  </section>
+
+  <section id="token">
+    <h2>🔐 Token-Based API Access</h2>
+    <label><input type="checkbox"> Ensure all requests have Authorization header</label>
+    <pre>Authorization: Bearer ${token}</pre>
+    <pre>Content-Type: application/json</pre>
+    <label><input type="checkbox"> Global AppContext or hook to inject token</label>
+  </section>
+
+  <script>
+    const checkboxes = document.querySelectorAll("input[type='checkbox']");
+    checkboxes.forEach((box, i) => {
+      const saved = localStorage.getItem(`check-${i}`);
+      if (saved === "true") box.checked = true;
+      box.addEventListener("change", () => {
+        localStorage.setItem(`check-${i}`, box.checked);
+      });
+    });
+  </script>
+</body>
+</html>

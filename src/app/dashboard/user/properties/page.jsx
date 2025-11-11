@@ -1,0 +1,100 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useApp } from "@/context/AppContext";
+import { toast } from "react-toastify";
+import { FaHome } from "react-icons/fa";
+import PropertyCard from "@/components/PropertyCard";
+
+export default function UserDashboard() {
+  const { userToken, BASE_URL, user } = useApp();
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const userId = user?.id;
+
+  const fetchProperties = async () => {
+    if (!userToken || !userId) return toast.error("Missing credentials");
+
+    setLoading(true);
+    try {
+      const res = await fetch(`${BASE_URL}/users/${userId}/properties`, {
+        headers: { Authorization: `Bearer ${userToken}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.msg || "Failed to fetch properties");
+
+      const boughtProperties = (data.data || []).map((p) => ({
+        ...p,
+        isBought: true,
+        market_status: "BOUGHT",
+      }));
+      setProperties(boughtProperties || []);
+      console.log("Properties Bought details", boughtProperties);
+    } catch (err) {
+      toast.error(err.message || "Error fetching properties");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (userToken && userId) {
+      fetchProperties();
+    }
+  }, [userToken, userId]);
+
+  // Skeleton loader
+  const SkeletonGrid = () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {[...Array(4)].map((_, i) => (
+        <div
+          key={i}
+          className="border border-gray-100 bg-white rounded-2xl shadow-sm animate-pulse"
+        >
+          <div className="w-full h-56 bg-gray-200 rounded-t-2xl"></div>
+          <div className="p-5 space-y-3">
+            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  return (
+    <div className="p-6">
+      {loading ? (
+        <SkeletonGrid />
+      ) : (
+        <>
+          {/* Properties */}
+          <section className="mb-10">
+            <h2 className="text-lg font-semibold mb-3">My Properties</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {properties.length > 0 ? (
+                properties.map((p) => (
+                  <PropertyCard
+                    key={p.id}
+                    id={p.id}
+                    imageSrc={p.images?.[0] || "/placeholder.jpg"}
+                    title={p.name}
+                    location={`${p.city || ""}, ${p.state || ""}`}
+                    price={`₦${Number(p.price)?.toLocaleString()}`}
+                    bedrooms={p.bedroom || 0}
+                    bathrooms={p.bathroom || 0}
+                    area={p.total_area || "N/A"}
+                    isBought={p.market_status === "BOUGHT"}
+                  />
+                ))
+              ) : (
+                <p className="text-gray-500">No properties found.</p>
+              )}
+            </div>
+          </section>
+        </>
+      )}
+    </div>
+  );
+}
