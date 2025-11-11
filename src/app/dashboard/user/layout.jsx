@@ -67,9 +67,9 @@ export default function UserLayout({ children }) {
     <div className={`${theme === "dark" ? "bg-gray-800 text-gray-100" : "bg-gray-100 text-gray-900"} flex min-h-screen transition-colors duration-300`}>
       
       {/* ===== Desktop Sidebar ===== */}
-      <aside className={`hidden md:flex w-64 flex-col justify-between p-4 rounded-r-2xl shadow-lg sticky top-0 ${sidebarBg}`}>
+      <aside className={`hidden md:flex w-64 flex-col justify-between p-4 shadow-lg sticky  ${sidebarBg}`}>
         <div>
-          <div className="text-center py-6 flex flex-row items-center gap-2">
+          <div className="text-center p-2 flex flex-row items-center gap-2">
             <MdRealEstateAgent size={32} />
             <h1 className="text-center text-2xl font-bold">User</h1>
           </div>
