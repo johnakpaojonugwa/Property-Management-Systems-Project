@@ -13,7 +13,33 @@ export const AppProvider = ({ children }) => {
 
   const [loading, setLoading] = useState(false);
 
-  // Support all role tokens
+  const [theme, setTheme] = useState("light");
+
+  //Theme setup
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    //Load theme from localStorage or system preference
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.classList.toggle("dark", savedTheme === "dark");
+    } else {
+      const preferDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const initialTheme = preferDark ? "dark" : "light";
+      setTheme(initialTheme);
+      document.documentElement.classList.toggle("dark", preferDark);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
+  };
+
+  // Auth setup
   const [user, setUser] = useState(null);
   const [userToken, setUserToken] = useState("");
 
@@ -193,6 +219,8 @@ export const AppProvider = ({ children }) => {
         isMerchant,
         token,
         currentUser,
+        theme,
+        toggleTheme,
       }}
     >
       {children}
