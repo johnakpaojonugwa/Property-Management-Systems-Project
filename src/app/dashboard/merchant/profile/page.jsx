@@ -4,10 +4,10 @@ import { useApp } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
-import { FaEnvelope, FaPhone, FaUser, FaCalendarAlt } from "react-icons/fa";
+import { FaEnvelope, FaUser, FaCalendarAlt } from "react-icons/fa";
 
 export default function MerchantProfile() {
-  const { merchant, merchantToken } = useApp();
+  const { merchant, merchantToken, theme } = useApp();
   const router = useRouter();
 
   console.log("AppContext merchant:", merchant);
@@ -30,12 +30,21 @@ export default function MerchantProfile() {
   }
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-semibold text-center mb-8">
-        Merchant Profile
-      </h1>
-
-      <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 space-y-6">
+    <div
+      className={`p-6 transition-all duration-300 ${
+        theme === "dark"
+          ? "bg-[#0b0b0f] text-gray-200"
+          : "bg-slate-100 text-gray-800"
+      }`}
+    >
+      {/* Merchant Card */}
+      <div
+        className={`rounded-2xl p-6 max-w-6xl mx-auto mb-8 shadow-md border transition-all duration-300 ${
+          theme === "dark"
+            ? "bg-[#151521] border-[#2a2a3b]"
+            : "bg-white border-gray-200"
+        }`}
+      >
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           <img
             src="/default-avatar2.jpg"
@@ -46,15 +55,11 @@ export default function MerchantProfile() {
           <div className="flex-1 space-y-2">
             <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <FaUser className="text-blue-600" />
-              {merchantData?.profile?.full_name || "Unnamed Merchant"}
+              {merchantData?.profile?.full_name || "Merchant"}
             </h2>
             <p className="flex items-center gap-2 text-gray-600">
               <FaEnvelope className="text-blue-500" />
-              {merchantData?.profile?.email}
-            </p>
-            <p className="flex items-center gap-2 text-gray-600">
-              <FaPhone className="text-blue-500" />
-              {merchantData?.profile?.phone || "N/A"}
+              {merchantData?.profile?.email || "admin@gmail.com"}
             </p>
             <p className="flex items-center gap-2 text-gray-600">
               <FaCalendarAlt className="text-blue-500" />
@@ -77,7 +82,9 @@ export default function MerchantProfile() {
             Status:{" "}
             <span
               className={`font-semibold ${
-                merchantData?.profile?.is_verified ? "text-green-600" : "text-yellow-600"
+                merchantData?.profile?.is_verified
+                  ? "bg-green-100 text-green-700 dark:bg-green-800/30 dark:text-green-300"
+                  : "bg-yellow-100 text-yellow-700 dark:bg-yellow-800/30 dark:text-yellow-300"
               }`}
             >
               {merchant.is_verified ? "Verified" : "Pending Verification"}

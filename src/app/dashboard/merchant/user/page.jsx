@@ -6,7 +6,6 @@ import { toast } from "react-toastify";
 import Link from "next/link";
 import { FaPlus, FaTrash, FaEdit } from "react-icons/fa";
 import Image from "next/image";
-import { LiaSpinnerSolid } from "react-icons/lia";
 
 export default function User() {
   const { merchantToken, BASE_URL } = useApp();
@@ -70,15 +69,32 @@ export default function User() {
     if (merchantToken) fetchUser();
   }, [merchantToken]);
 
+  const SkeletonGrid = () => {
+    return (
+      <div className="bg-white shadow-md border border-gray-100 rounded-xl p-4 animate-pulse">
+        <div className="flex items-center gap-4">
+          <div className="rounded-full bg-gray-200 w-24 h-24 sm:w-32 sm:h-32" />
+          <div className="flex-1 space-y-2">
+            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+            <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+          </div>
+        </div>
+        <div className="mt-4 flex justify-between">
+          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <h1 className="text-2xl font-semibold">Merchant Users</h1>
-
+      <div className="flex flex-col md:flex-row justify-end items-center mb-6 gap-4">
         <Link
           href="/dashboard/merchant/user/create"
-          className="flex items-center gap-2 bg-blue-950 text-white px-4 py-2 rounded-md hover:bg-blue-900"
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
         >
           <FaPlus /> Create User
         </Link>
@@ -86,15 +102,17 @@ export default function User() {
 
       {/* User List */}
       {loading ? (
-        <div className="flex justify-center items-center min-h-[40vh]">
-          <LiaSpinnerSolid className="animate-spin text-[#3A2B66]" size={50} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(5)].map((_, i) => (
+            <SkeletonGrid key={i} />
+          ))}
         </div>
       ) : user.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {user.map((u) => (
             <div
               key={u.id}
-              className="bg-white shadow-md border border-gray-100 rounded-xl p-4 transition-transform hover:scale-[1.02]"
+              className="bg-gray-100 shadow-md border border-gray-100 rounded-xl p-4 transition-transform hover:scale-[1.02]"
             >
               <div className="flex items-center gap-4">
                 <Image

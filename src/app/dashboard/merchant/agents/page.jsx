@@ -2,14 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
-import { LiaSpinnerSolid } from "react-icons/lia";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import { FaPlus, FaTrash, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import Image from "next/image";
 
 export default function Agents() {
-  const { merchantToken, BASE_URL } = useApp();
+  const { merchantToken, BASE_URL, theme } = useApp();
   const [agents, setAgents] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -62,7 +61,7 @@ export default function Agents() {
     }
   };
 
-  //  Delete agent
+  // Delete agent
   const deleteAgent = async (id) => {
     if (!confirm("Are you sure you want to delete this agent?")) return;
 
@@ -87,15 +86,37 @@ export default function Agents() {
     if (merchantToken) fetchAgents();
   }, [merchantToken]);
 
-  return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <h1 className="text-2xl font-semibold">Merchant Agents</h1>
+  // Theme classes
+  const isDark = theme === "dark";
+  const bgMain = isDark ? "bg-gray-900" : "bg-gray-50";
+  const bgCard = isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100";
+  const textPrimary = isDark ? "text-gray-100" : "text-gray-900";
+  const textSecondary = isDark ? "text-gray-400" : "text-gray-500";
 
+  const SkeletonGrid = () => (
+    <div className={`${bgCard} shadow-md border rounded-xl p-4 animate-pulse`}>
+      <div className="flex items-center gap-4">
+        <div className="rounded-full bg-gray-400/30 w-24 h-24 sm:w-32 sm:h-32" />
+        <div className="flex-1 space-y-2">
+          <div className="h-4 bg-gray-400/30 rounded w-3/4"></div>
+          <div className="h-3 bg-gray-400/30 rounded w-1/2"></div>
+          <div className="h-3 bg-gray-400/30 rounded w-1/3"></div>
+        </div>
+      </div>
+      <div className="mt-4 flex justify-between">
+        <div className="h-4 bg-gray-400/30 rounded w-1/4"></div>
+        <div className="h-4 bg-gray-400/30 rounded w-1/4"></div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className={`p-6 min-h-screen transition-colors duration-300 ${textPrimary}`}>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-end items-center mb-8 gap-4">
         <Link
           href="/dashboard/merchant/agents/create"
-          className="flex items-center gap-2 bg-blue-950 text-white px-4 py-2 rounded-md hover:bg-blue-900"
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-all"
         >
           <FaPlus /> Create Agent
         </Link>
@@ -103,15 +124,17 @@ export default function Agents() {
 
       {/* Agent List */}
       {loading ? (
-        <div className="flex justify-center items-center min-h-[40vh]">
-          <LiaSpinnerSolid className="animate-spin text-[#3A2B66]" size={50} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => (
+            <SkeletonGrid key={i} />
+          ))}
         </div>
       ) : agents.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {agents.map((agent) => (
             <div
               key={agent.id}
-              className="bg-white shadow-md border border-gray-100 rounded-xl p-4 transition-transform hover:scale-[1.02]"
+              className={`${bgCard} shadow-md border rounded-xl p-5 transition-transform hover:scale-[1.02] hover:shadow-lg`}
             >
               <div className="flex items-center gap-4">
                 <Image
@@ -122,27 +145,27 @@ export default function Agents() {
                   className="rounded-full object-cover border w-24 h-24 sm:w-32 sm:h-32"
                 />
                 <div>
-                  <h3 className="font-semibold text-lg">{agent.full_name}</h3>
-                  <p className="text-gray-500 text-sm">{agent.email}</p>
-                  <p className="text-gray-400 text-xs">{agent.phone}</p>
+                  <h3 className={`font-semibold text-lg ${textPrimary}`}>{agent.full_name}</h3>
+                  <p className={`text-sm ${textSecondary}`}>{agent.email}</p>
+                  <p className={`text-xs ${textSecondary}`}>{agent.phone}</p>
                 </div>
               </div>
 
-              {/* ✅ New section for actions */}
+              {/* Action buttons */}
               <div className="mt-4 flex justify-between text-sm">
                 <Link
                   href={`/dashboard/merchant/agents/${agent.id}`}
-                  className="text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-blue-500 hover:text-blue-600 font-medium transition-colors"
                 >
                   View Details
                 </Link>
 
                 <button
                   onClick={() => verifyAgent(agent.id, agent.is_verified)}
-                  className={`flex items-center gap-1 ${
+                  className={`flex items-center gap-1 transition-colors ${
                     agent.is_verified
-                      ? "text-green-600 hover:text-green-700"
-                      : "text-yellow-600 hover:text-yellow-700"
+                      ? "text-green-500 hover:text-green-600"
+                      : "text-yellow-500 hover:text-yellow-600"
                   }`}
                 >
                   {agent.is_verified ? (
@@ -158,7 +181,7 @@ export default function Agents() {
 
                 <button
                   onClick={() => deleteAgent(agent.id)}
-                  className="text-red-500 hover:text-red-700 flex items-center gap-1"
+                  className="text-red-500 hover:text-red-600 flex items-center gap-1 transition-colors"
                 >
                   <FaTrash /> Delete
                 </button>
@@ -167,7 +190,7 @@ export default function Agents() {
           ))}
         </div>
       ) : (
-        <p className="text-gray-500 text-center">No agents found.</p>
+        <p className={`${textSecondary} text-center mt-10`}>No agents found.</p>
       )}
     </div>
   );

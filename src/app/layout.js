@@ -2,7 +2,6 @@ import { AppProvider } from "../context/AppContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Lusitana } from "next/font/google";
-import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
 
 const lusitana = Lusitana({
@@ -34,7 +33,7 @@ function ClientProviders({ children }) {
   return (
     <AppProvider>
       {children}
-      <ToastContainer position="top-right" autoClose={3000} />
+      <ToastContainer position="top-center" autoClose={3000} />
     </AppProvider>
   );
 }

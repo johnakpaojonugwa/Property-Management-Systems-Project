@@ -13,44 +13,43 @@ export default function AgentProperties() {
   const [loading, setLoading] = useState(false);
 
   // Fetch agent properties
+  const fetchAllProperties = async () => {
+    setLoading(true);
+    try {
+      const agentRes = await fetch(
+        `${BASE_URL}/properties?agent=${agent.id}&verified=true`,
+        {
+          headers: { Authorization: `Bearer ${agentToken}` },
+        }
+      );
+      const agentData = await agentRes.json();
+
+      const userRes = await fetch(`${BASE_URL}/users/${user.id}/properties`, {
+        headers: { Authorization: `Bearer ${userToken}` },
+      });
+      const userData = await userRes.json();
+
+      const availableProperties = (agentData.data || []).map((p) => ({
+        ...p,
+        isBought: false,
+        market_status: "AVAILABLE",
+      }));
+
+      const boughtProperties = (userData.data || []).map((p) => ({
+        ...p,
+        isBought: true,
+        market_status: "BOUGHT",
+      }));
+
+      const combined = [...availableProperties, ...boughtProperties];
+      setProperties(combined);
+    } catch (error) {
+      console.log("Error fetching properties:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchAllProperties = async () => {
-      setLoading(true);
-      try {
-        const agentRes = await fetch(
-          `${BASE_URL}/properties?agent=${agent.id}&verified=true`,
-          {
-            headers: { Authorization: `Bearer ${agentToken}` },
-          }
-        );
-        const agentData = await agentRes.json();
-
-        const userRes = await fetch(`${BASE_URL}/users/${user.id}/properties`, {
-          headers: { Authorization: `Bearer ${userToken}` },
-        });
-        const userData = await userRes.json();
-
-        const availableProperties = (agentData.data || []).map((p) => ({
-          ...p,
-          isBought: false,
-          market_status: "AVAILABLE",
-        }));
-
-        const boughtProperties = (userData.data || []).map((p) => ({
-          ...p,
-          isBought: true,
-          market_status: "BOUGHT",
-        }));
-
-        const combined = [...availableProperties, ...boughtProperties];
-        setProperties(combined);
-      } catch (error) {
-        console.log("Error fetching properties:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (agentToken && userToken) fetchAllProperties();
   }, [agentToken, userToken]);
 
@@ -67,7 +66,7 @@ export default function AgentProperties() {
       const data = await res.json();
       if (res.ok) {
         toast.success("Property deleted successfully");
-        fetchProperties();
+        fetchAllProperties();
       } else {
         toast.error(data?.msg || "Failed to delete property");
       }

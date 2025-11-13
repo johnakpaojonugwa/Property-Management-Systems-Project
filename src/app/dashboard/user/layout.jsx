@@ -79,12 +79,12 @@ export default function UserLayout({ children }) {
 
   // Sidebar classes
   const sidebarBg =
-    theme === "dark" ? "bg-gray-900 text-gray-100" : "bg-white text-gray-800";
-  const sidebarLinkActive = "bg-blue-600 text-white";
+    theme === "dark" ? "bg-gray-900 text-gray-100" : "bg-indigo-950 text-gray-100";
+  const sidebarLinkActive = "bg-white text-gray-800";
   const sidebarLinkInactive =
     theme === "dark"
       ? "text-gray-300 hover:bg-gray-700"
-      : "text-gray-700 hover:bg-blue-100";
+      : "text-gray-100 hover:bg-blue-100 hover:text-gray-900";
 
   return (
     <div
@@ -191,7 +191,7 @@ export default function UserLayout({ children }) {
         {/* Header */}
         <header
           className={`flex justify-between items-center p-4 md:p-6 shadow-md sticky top-0 z-30 backdrop-blur-sm transition-colors duration-300 ${
-            theme === "dark" ? "bg-gray-900" : "bg-white"
+            theme === "dark" ? "bg-gray-900" : "bg-indigo-950 text-gray-100"
           }`}
         >
           <div className="flex items-center gap-4">

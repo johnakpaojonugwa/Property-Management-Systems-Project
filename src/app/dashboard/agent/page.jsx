@@ -7,54 +7,26 @@ import { FaHome, FaUsers, FaCalendarAlt, FaStar } from "react-icons/fa";
 import PropertyCard from "@/components/PropertyCard";
 import axios from "axios";
 
-/* Small skeleton components */
-const PropertiesSkeleton = () => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-    {[...Array(4)].map((_, i) => (
-      <div
-        key={i}
-        className="border border-gray-100 bg-white rounded-2xl shadow-sm animate-pulse"
-      >
-        <div className="w-full h-56 bg-gray-200 rounded-t-2xl" />
-        <div className="p-5 space-y-3">
-          <div className="h-4 bg-gray-200 rounded w-3/4" />
-          <div className="h-3 bg-gray-200 rounded w-1/2" />
-          <div className="h-4 bg-gray-200 rounded w-1/3" />
-        </div>
-      </div>
-    ))}
-  </div>
-);
-
-const ReviewsSkeleton = () => (
-  <div className="space-y-3">
-    {[...Array(5)].map((_, i) => (
-      <div key={i} className="p-3 bg-gray-200 rounded animate-pulse h-16" />
-    ))}
-  </div>
-);
-
 export default function AgentDashboard() {
-  const { agentToken, BASE_URL, agent, user, userToken } = useApp();
+  const { agentToken, BASE_URL, agent, user, userToken, theme } = useApp();
   const [properties, setProperties] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [filter, setFilter] = useState("All");
 
-
   const filteredProperties = properties.filter((p) => {
-  if (filter === "Bought") return p.isBought || p.market_status === "BOUGHT";
-  if (filter === "Available") return !p.isBought && p.market_status !== "BOUGHT";
-  return true;
-});
+    if (filter === "Bought") return p.isBought || p.market_status === "BOUGHT";
+    if (filter === "Available")
+      return !p.isBought && p.market_status !== "BOUGHT";
+    return true;
+  });
 
   // separate loading states so we can show skeletons per-section
   const [loadingProps, setLoadingProps] = useState(false);
   const [loadingAppts, setLoadingAppts] = useState(false);
   const [loadingReviews, setLoadingReviews] = useState(false);
 
-  const [selectedPropertyId, setSelectedPropertyId] = useState("");  
-  
+  const [selectedPropertyId, setSelectedPropertyId] = useState("");
 
   // Fetch properties (agent + user) -> combined
   useEffect(() => {
@@ -63,6 +35,7 @@ export default function AgentDashboard() {
       try {
         // safe agent id extraction
         const agentId = agent?.id || agent?.profile?._id;
+
         const agentRes = await axios.get(`${BASE_URL}/properties`, {
           params: { agent: agentId, verified: true },
           headers: { Authorization: `Bearer ${agentToken}` },
@@ -95,7 +68,7 @@ export default function AgentDashboard() {
           setSelectedPropertyId(firstId);
         }
       } catch (err) {
-        console.error("Error fetching properties:", err);
+        console.log("Error fetching properties:", err);
         toast.error("Failed to fetch properties");
       } finally {
         setLoadingProps(false);
@@ -168,41 +141,78 @@ export default function AgentDashboard() {
     return new Set(ids).size;
   };
 
+  /* Small skeleton components */
+  const PropertiesSkeleton = () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {[...Array(4)].map((_, i) => (
+        <div
+          key={i}
+          className="border border-gray-100 bg-white rounded-2xl shadow-sm animate-pulse"
+        >
+          <div className="w-full h-56 bg-gray-200 rounded-t-2xl" />
+          <div className="p-5 space-y-3">
+            <div className="h-4 bg-gray-200 rounded w-3/4" />
+            <div className="h-3 bg-gray-200 rounded w-1/2" />
+            <div className="h-4 bg-gray-200 rounded w-1/3" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const ReviewsSkeleton = () => (
+    <div className="space-y-3">
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="p-3 bg-gray-200 rounded animate-pulse h-16" />
+      ))}
+    </div>
+  );
+
+  const cards = [
+    {
+      title: "Total Properties",
+      value: properties.length,
+      icon: <FaHome size={24} />,
+      color: "bg-purple-100 text-purple-500",
+    },
+    {
+      title: "Appointments",
+      value: appointments.length,
+      icon: <FaCalendarAlt size={24} />,
+      color: "bg-blue-100 text-blue-500",
+    },
+    {
+      title: "Clients",
+      value: uniqueClientsCount(),
+      icon: <FaUsers size={24} />,
+      color: "bg-green-100 text-green-500",
+    },
+    {
+      title: "Recent Reviews ",
+      value: reviews.length,
+      icon: <FaStar size={24} />,
+      color: "bg-red-100 text-red-500",
+    },
+  ];
+
   return (
-    <div className="p-6">
+    <div className="p-6 md:p-8 space-y-8">
+      <h1 className="text-xl font-semibold mb-4 flex items-center gap-2">
+        Dashboard Overview
+      </h1>
+
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white shadow-md rounded-lg p-5 flex items-center gap-3">
-          <FaHome className="text-blue-500 text-3xl" />
-          <div>
-            <p className="text-gray-500 text-sm">Total Properties</p>
-            <h3 className="text-xl font-semibold">{properties.length}</h3>
-          </div>
-        </div>
-
-        <div className="bg-white shadow-md rounded-lg p-5 flex items-center gap-3">
-          <FaCalendarAlt className="text-green-500 text-3xl" />
-          <div>
-            <p className="text-gray-500 text-sm">Appointments</p>
-            <h3 className="text-xl font-semibold">{appointments.length}</h3>
-          </div>
-        </div>
-
-        <div className="bg-white shadow-md rounded-lg p-5 flex items-center gap-3">
-          <FaUsers className="text-orange-500 text-3xl" />
-          <div>
-            <p className="text-gray-500 text-sm">Clients</p>
-            <h3 className="text-xl font-semibold">{uniqueClientsCount()}</h3>
-          </div>
-        </div>
-
-        <div className="bg-white shadow-md rounded-lg p-5 flex items-center gap-3">
-          <FaStar className="text-yellow-500 text-3xl" />
-          <div>
-            <p className="text-gray-500 text-sm">Recent Reviews</p>
-            <h3 className="text-xl font-semibold">{reviews.length}</h3>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        {cards.map((c) => (
+          <DashboardCard
+            key={c.title}
+            title={c.title}
+            value={c.value}
+            icon={c.icon}
+            color={c.color}
+            theme={theme}
+          />
+        ))}
       </div>
 
       {/* Main content */}
@@ -355,6 +365,34 @@ export default function AgentDashboard() {
             )}
           </div>
         </section>
+      </div>
+    </div>
+  );
+}
+function DashboardCard({ title, value, icon, color, theme }) {
+  return (
+    <div
+      className={`flex justify-between items-center p-5 rounded-xl shadow-md transition-shadow duration-300 ${
+        theme === "dark"
+          ? "bg-gray-800 text-gray-100"
+          : "bg-gray-50 text-gray-900"
+      }`}
+    >
+      <div>
+        <p
+          className={`text-sm ${
+            theme === "dark" ? "text-gray-300" : "text-gray-500"
+          }`}
+        >
+          {title}
+        </p>
+
+        <h3 className="text-2xl md:text-3xl font-bold mt-1">{value}</h3>
+      </div>
+      <div
+        className={`p-3 rounded-lg flex items-center justify-center text-2xl ${color} shadow-sm`}
+      >
+        {icon}
       </div>
     </div>
   );
