@@ -13,16 +13,76 @@ import {
   FaSignOutAlt,
   FaBars,
 } from "react-icons/fa";
-import { MdRealEstateAgent, MdReviews, MdOutlineKeyboardArrowRight } from "react-icons/md";
+import {
+  MdRealEstateAgent,
+  MdReviews,
+  MdOutlineKeyboardArrowRight,
+} from "react-icons/md";
 import { LiaSpinnerSolid } from "react-icons/lia";
+import { toast } from "react-toastify";
 
 export default function AgentLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { agent, agentToken, logout, theme, toggleTheme } = useApp();
+  const {
+    agent,
+    agentToken,
+    logout,
+    theme,
+    toggleTheme,
+    merchantToken,
+    BASE_URL,
+  } = useApp();
   const [collapsed, setCollapsed] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [agentData, setAgentData] = useState(agent);
+
+  useEffect(() => {
+    if (!merchantToken) {
+      toast.error("Please login first!");
+      return;
+    }
+
+    //Get Agent Details
+    const fetchAgents = async () => {
+      try {
+        setLoading(true);
+        let foundAgent = null;
+        let page = 0;
+        const limit = 5;
+        let morePages = true;
+
+        while (morePages && !foundAgent) {
+          const res = await fetch(
+            `${BASE_URL}/merchants/agents?offset=${
+              page * limit
+            }&limit=${limit}`,
+            {
+              headers: { Authorization: `Bearer ${merchantToken}` },
+            }
+          );
+
+          const data = await res.json();
+          if (!res.ok) throw new Error(data?.msg || "Failed to fetch agents");
+
+          foundAgent = data?.data?.find((a) => a.id === agent.id);
+          morePages = data?.data?.length === limit;
+          page++;
+        }
+
+        if (!foundAgent) throw new Error("Agent not found");
+        setAgentData(foundAgent);
+        console.log("AgentData:", foundAgent);
+      } catch (err) {
+        toast.error(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAgents();
+  }, [merchantToken, BASE_URL]);
 
   const isDark = theme === "dark";
 
@@ -37,16 +97,15 @@ export default function AgentLayout({ children }) {
       return;
     }
 
-        // simulate load delay for smooth transition
+    // simulate load delay for smooth transition
     const timer = setTimeout(() => setLoading(false), 200);
     return () => clearTimeout(timer);
   }, [agentToken, agent]);
 
-      //Close dropdown when sidebar collapses
+  //Close dropdown when sidebar collapses
   useEffect(() => {
     if (collapsed) setDropdownOpen(false);
   }, [collapsed]);
-
 
   if (loading || !agent)
     return (
@@ -54,12 +113,6 @@ export default function AgentLayout({ children }) {
         <LiaSpinnerSolid className="animate-spin text-[#3A2B66]" size={50} />
       </div>
     );
-
-  // Agent display name or fallback
-  const agentName = agent?.profile?.name || "Agent";
-
-  const agentEmail = agent?.profile?.email || agent?.email || "agent@gmail.com";
-
 
   // Navigation items
   const navLinks = [
@@ -103,6 +156,15 @@ export default function AgentLayout({ children }) {
     router.push("/login");
   };
 
+  // No agent found
+  if (!agentData) {
+    return (
+      <div className="p-8 text-center text-gray-500">
+        No agent information found. Please log in again.
+      </div>
+    );
+  }
+
   return (
     <div
       className={`flex min-h-screen transition-all duration-300 ${
@@ -123,9 +185,7 @@ export default function AgentLayout({ children }) {
         <div>
           <div className="flex items-center py-5 px-4 border-b border-gray-200/50 gap-2">
             <MdRealEstateAgent size={26} className="text-blue-600" />
-            {!collapsed && (
-              <h1 className="text-2xl font-bold">Agent</h1>
-            )}
+            {!collapsed && <h1 className="text-2xl font-bold">Agent</h1>}
           </div>
 
           {/* Navigation */}
@@ -215,13 +275,16 @@ export default function AgentLayout({ children }) {
                 }`}
               >
                 <div className="w-9 h-9 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold">
-                  {agentName.charAt(0)}
+                  {agentData?.full_name?.charAt(0)?.toUpperCase()}
                 </div>
+
                 {!collapsed && (
                   <div className="hidden sm:block text-left">
-                    <p className="text-sm font-medium truncate">{agentName}</p>
+                    <p className="text-sm font-medium truncate">
+                      {agentData?.full_name || "Agent"}
+                    </p>
                     <p className="text-xs text-gray-500 truncate">
-                      {agentEmail}
+                      {agentData?.email || "agent@gmail.com"}
                     </p>
                   </div>
                 )}

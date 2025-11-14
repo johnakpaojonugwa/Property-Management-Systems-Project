@@ -8,7 +8,7 @@ import PropertyCard from "@/components/PropertyCard";
 import axios from "axios";
 
 export default function AgentDashboard() {
-  const { agentToken, BASE_URL, agent, user, userToken } = useApp();
+  const { agentToken, BASE_URL, agent, user, userToken, theme } = useApp();
   const [properties, setProperties] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [filter, setFilter] = useState("All");
@@ -103,30 +103,39 @@ export default function AgentDashboard() {
     fetchReviews();
   }, [selectedPropertyId, agentToken, BASE_URL]);
 
-
   const ReviewsSkeleton = () => (
-  <div className="space-y-3">
-    {[...Array(1)].map((_, i) => (
-      <div key={i} className="p-3 bg-gray-200 rounded animate-pulse h-16" />
-    ))}
-  </div>
-);
+    <div className="space-y-3">
+      {[...Array(1)].map((_, i) => (
+        <div key={i} className="p-3 bg-gray-200 rounded animate-pulse h-16" />
+      ))}
+    </div>
+  );
 
   return (
-    <div className="p-6">
+    <div
+      className={`p-6 ${
+        theme === "dark"
+          ? "bg-gray-800 text-gray-100"
+          : "bg-white text-gray-900"
+      }`}
+    >
       {/* Main content */}
       <div className="space-y-8">
         {/* Reviews with property select */}
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">Property Reviews</h2>
+            <h2 className="text-3xl font-bold">Property Reviews</h2>
           </div>
 
           <div className="mb-4">
             <select
               value={selectedPropertyId}
               onChange={(e) => setSelectedPropertyId(e.target.value)}
-              className="border border-gray-300 rounded-lg p-2 w-full max-w-sm focus:ring-2 focus:ring-blue-400"
+              className={`border border-gray-300 rounded-lg p-2 w-full max-w-sm focus:ring-2 focus:ring-blue-400 ${
+                theme === "dark"
+                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:ring-blue-400"
+                  : "bg-white border-gray-300 text-gray-900 focus:ring-vlue-400"
+              }`}
             >
               <option value="">Select a property</option>
               {properties.map((p) => {
@@ -140,7 +149,7 @@ export default function AgentDashboard() {
             </select>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-4 min-h-[120px]">
+          <div className="rounded-lg shadow p-4 min-h-[120px]">
             {loadingReviews ? (
               <ReviewsSkeleton />
             ) : reviews.length > 0 ? (
@@ -150,7 +159,11 @@ export default function AgentDashboard() {
                     <p className="font-medium">
                       {r.user?.full_name || r.reviewer_name || "Anonymous"}
                     </p>
-                    <p className="text-gray-700">
+                    <p
+                      className={`${
+                        theme === "dark" ? "text-gray-200" : "text-gray-700"
+                      }`}
+                    >
                       {r.text || r.comment || "No comment"}
                     </p>
                     <p className="text-sm text-gray-400 mt-1">
@@ -160,9 +173,19 @@ export default function AgentDashboard() {
                 ))}
               </ul>
             ) : selectedPropertyId ? (
-              <p className="text-gray-500">No reviews for this property yet.</p>
+              <p
+                className={`${
+                  theme === "dark" ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
+                No reviews for this property yet.
+              </p>
             ) : (
-              <p className="text-gray-500">
+              <p
+                className={`${
+                  theme === "dark" ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
                 Select a property to view its reviews.
               </p>
             )}

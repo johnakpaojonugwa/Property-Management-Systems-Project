@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
 import { toast } from "react-toastify";
-import { FaHome } from "react-icons/fa";
 import PropertyCard from "@/components/PropertyCard";
 
 export default function UserDashboard() {

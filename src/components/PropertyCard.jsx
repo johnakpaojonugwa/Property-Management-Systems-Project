@@ -63,7 +63,7 @@ export default function PropertyCard({
   };
 
   return (
-    <div className="relative border border-gray-100 bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 text-left hover:-translate-y-1 cursor-pointer">
+    <div className="relative border border-gray-100 bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 text-left hover:-translate-y-1 cursor-pointer flex-grow">
       <Link href={`/properties/${id}`}>
         {/* Image Section */}
         <div className="relative rounded-t-2xl overflow-hidden">
@@ -106,7 +106,7 @@ export default function PropertyCard({
 
           {/* Details + Status */}
           <div className="flex justify-between items-center border-t border-gray-100 pt-3">
-            <div className="flex gap-4 items-center text-gray-600 text-sm">
+            <div className="flex gap-4 items-center text-gray-600 text-sm flex-wrap">
               <div className="flex items-center gap-1">
                 <FaBed className="text-blue-950" size={14} />
                 <span className="text-xs">{bedrooms}</span>

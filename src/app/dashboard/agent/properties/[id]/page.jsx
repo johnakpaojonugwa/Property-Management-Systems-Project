@@ -89,7 +89,13 @@ export default function PropertyPage() {
   const thumbnails = Array.isArray(property.images) ? property.images : [];
 
   return (
-    <main className="max-w-7xl mx-auto p-6">
+    <div
+      className={`max-w-7xl mx-auto p-6 ${
+        theme === "dark"
+          ? "bg-gray-800 text-gray-100"
+          : "bg-white text-slate-900"
+      }`}
+    >
       {/* Header */}
       <header className="bg-white rounded-2xl p-8 mb-10 border border-gray-100">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -261,6 +267,6 @@ export default function PropertyPage() {
           </div>
         </aside>
       </section>
-    </main>
+    </div>
   );
 }

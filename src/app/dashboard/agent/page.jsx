@@ -8,32 +8,28 @@ import PropertyCard from "@/components/PropertyCard";
 import axios from "axios";
 
 export default function AgentDashboard() {
-  const { agentToken, BASE_URL, agent, user, userToken, theme } = useApp();
+  const { agentToken, BASE_URL, agent, user, userToken, theme, merchantToken } = useApp();
   const [properties, setProperties] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [filter, setFilter] = useState("All");
+  const [selectedPropertyId, setSelectedPropertyId] = useState("");
 
-  const filteredProperties = properties.filter((p) => {
-    if (filter === "Bought") return p.isBought || p.market_status === "BOUGHT";
-    if (filter === "Available")
-      return !p.isBought && p.market_status !== "BOUGHT";
-    return true;
-  });
-
-  // separate loading states so we can show skeletons per-section
   const [loadingProps, setLoadingProps] = useState(false);
   const [loadingAppts, setLoadingAppts] = useState(false);
   const [loadingReviews, setLoadingReviews] = useState(false);
 
-  const [selectedPropertyId, setSelectedPropertyId] = useState("");
+  const filteredProperties = properties.filter((p) => {
+    if (filter === "Bought") return p.isBought || p.market_status === "BOUGHT";
+    if (filter === "Available") return !p.isBought && p.market_status !== "BOUGHT";
+    return true;
+  });
 
-  // Fetch properties (agent + user) -> combined
+  // Fetch properties
   useEffect(() => {
     const fetchAllProperties = async () => {
       setLoadingProps(true);
       try {
-        // safe agent id extraction
         const agentId = agent?.id || agent?.profile?._id;
 
         const agentRes = await axios.get(`${BASE_URL}/properties`, {
@@ -62,7 +58,6 @@ export default function AgentDashboard() {
         const combined = [...availableProperties, ...boughtProperties];
         setProperties(combined);
 
-        // If nothing selected, default to first property's id (if present)
         if (!selectedPropertyId && combined.length > 0) {
           const firstId = combined[0].id || combined[0]._id;
           setSelectedPropertyId(firstId);
@@ -90,10 +85,9 @@ export default function AgentDashboard() {
           params: { agent: agentId, completed: false, page: 0, limit: 10 },
           headers: { Authorization: `Bearer ${agentToken}` },
         });
-        const apptData = res.data?.data || [];
-        setAppointments(apptData);
+        setAppointments(res.data?.data || []);
       } catch (err) {
-        console.error("Failed to fetch appointments:", err);
+        console.log("Failed to fetch appointments:", err);
         toast.error("Failed to fetch appointments");
       } finally {
         setLoadingAppts(false);
@@ -103,7 +97,7 @@ export default function AgentDashboard() {
     fetchAppointments();
   }, [agentToken, agent, BASE_URL]);
 
-  // Fetch reviews when selectedPropertyId changes
+  // Fetch reviews
   useEffect(() => {
     if (!agentToken || !selectedPropertyId) {
       setReviews([]);
@@ -117,10 +111,9 @@ export default function AgentDashboard() {
           params: { property_id: selectedPropertyId, limit: 10, page: 0 },
           headers: { Authorization: `Bearer ${agentToken}` },
         });
-        const data = res.data?.data || [];
-        setReviews(data);
+        setReviews(res.data?.data || []);
       } catch (err) {
-        console.error("Failed to fetch reviews:", err);
+        console.log("Failed to fetch reviews:", err);
         toast.error("Failed to fetch reviews");
         setReviews([]);
       } finally {
@@ -131,29 +124,28 @@ export default function AgentDashboard() {
     fetchReviews();
   }, [selectedPropertyId, agentToken, BASE_URL]);
 
-  // helpers
   const uniqueClientsCount = () => {
     if (!appointments || appointments.length === 0) return 0;
-    // appointments may have user or user_id fields
     const ids = appointments
       .map((a) => a.user?.id || a.user?._id || a.user_id || a.userId)
       .filter(Boolean);
     return new Set(ids).size;
   };
 
-  /* Small skeleton components */
   const PropertiesSkeleton = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {[...Array(4)].map((_, i) => (
         <div
           key={i}
-          className="border border-gray-100 bg-white rounded-2xl shadow-sm animate-pulse"
+          className={`border rounded-2xl shadow-sm animate-pulse ${
+            theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-white border-gray-200"
+          }`}
         >
-          <div className="w-full h-56 bg-gray-200 rounded-t-2xl" />
+          <div className="w-full h-56 bg-gray-200 rounded-t-2xl dark:bg-gray-600" />
           <div className="p-5 space-y-3">
-            <div className="h-4 bg-gray-200 rounded w-3/4" />
-            <div className="h-3 bg-gray-200 rounded w-1/2" />
-            <div className="h-4 bg-gray-200 rounded w-1/3" />
+            <div className="h-4 bg-gray-200 rounded w-3/4 dark:bg-gray-600" />
+            <div className="h-3 bg-gray-200 rounded w-1/2 dark:bg-gray-600" />
+            <div className="h-4 bg-gray-200 rounded w-1/3 dark:bg-gray-600" />
           </div>
         </div>
       ))}
@@ -162,8 +154,13 @@ export default function AgentDashboard() {
 
   const ReviewsSkeleton = () => (
     <div className="space-y-3">
-      {[...Array(5)].map((_, i) => (
-        <div key={i} className="p-3 bg-gray-200 rounded animate-pulse h-16" />
+      {[...Array(1)].map((_, i) => (
+        <div
+          key={i}
+          className={`p-3 rounded animate-pulse h-16 ${
+            theme === "dark" ? "bg-gray-700" : "bg-gray-200"
+          }`}
+        />
       ))}
     </div>
   );
@@ -188,7 +185,7 @@ export default function AgentDashboard() {
       color: "bg-green-100 text-green-500",
     },
     {
-      title: "Recent Reviews ",
+      title: "Recent Reviews",
       value: reviews.length,
       icon: <FaStar size={24} />,
       color: "bg-red-100 text-red-500",
@@ -196,22 +193,19 @@ export default function AgentDashboard() {
   ];
 
   return (
-    <div className="p-6 md:p-8 space-y-8">
-      <h1 className="text-xl font-semibold mb-4 flex items-center gap-2">
+    <div
+      className={`p-6 md:p-8 space-y-8 min-h-screen transition-colors duration-300 ${
+        theme === "dark" ? "bg-gray-900 text-gray-100" : "bg-gray-100 text-gray-900"
+      }`}
+    >
+      <h1 className="text-3xl font-bold mb-4 flex items-center gap-2">
         Dashboard Overview
       </h1>
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {cards.map((c) => (
-          <DashboardCard
-            key={c.title}
-            title={c.title}
-            value={c.value}
-            icon={c.icon}
-            color={c.color}
-            theme={theme}
-          />
+          <DashboardCard key={c.title} {...c} theme={theme} />
         ))}
       </div>
 
@@ -219,10 +213,8 @@ export default function AgentDashboard() {
       <div className="space-y-8">
         {/* Properties */}
         <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">My Properties</h2>
-
-            {/* Filter Buttons */}
+          <div className="md:flex inline-block items-center md:justify-between mb-3 ">
+            <h2 className="text-xl font-bold">My Properties</h2>
             <div className="flex gap-2">
               {["All", "Available", "Bought"].map((type) => (
                 <button
@@ -230,7 +222,11 @@ export default function AgentDashboard() {
                   onClick={() => setFilter(type)}
                   className={`px-4 py-1 rounded-full text-sm font-medium border cursor-pointer transition-all ${
                     filter === type
-                      ? "bg-blue-950 text-white border-blue-900"
+                      ? theme === "dark"
+                        ? "bg-blue-600 text-white border-blue-500"
+                        : "bg-blue-950 text-white border-blue-900"
+                      : theme === "dark"
+                      ? "bg-gray-700 text-gray-200 border-gray-600 hover:bg-gray-600 hover:text-white"
                       : "bg-white text-gray-600 border-gray-300 hover:bg-gray-100"
                   }`}
                 >
@@ -254,144 +250,153 @@ export default function AgentDashboard() {
                     imageSrc={p.images?.[0] || "/placeholder.jpg"}
                     title={p.name || p.title}
                     location={[p.city, p.state].filter(Boolean).join(", ")}
-                    price={
-                      p.price ? `₦${Number(p.price).toLocaleString()}` : "N/A"
-                    }
+                    price={p.price ? `₦${Number(p.price).toLocaleString()}` : "N/A"}
                     bedrooms={p.bedroom || 0}
                     bathrooms={p.bathroom || 0}
                     area={p.total_area || "N/A"}
                     isBought={p.market_status === "BOUGHT" || p.isBought}
+                    theme={theme}
                   />
                 );
               })}
             </div>
           ) : (
-            <p className="text-gray-500">No properties found.</p>
+            <p className={`${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
+              No properties found.
+            </p>
           )}
         </section>
 
-        {/* Appointments */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">Recent Appointments</h2>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-4">
-            {loadingAppts ? (
-              <div className="space-y-3">
-                {[...Array(4)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="p-3 bg-gray-200 rounded animate-pulse h-16"
-                  />
-                ))}
-              </div>
-            ) : appointments.length > 0 ? (
-              <ul className="divide-y divide-gray-200">
-                {appointments.slice(0, 6).map((a) => {
-                  const userName =
-                    a.user?.full_name || a.user?.name || "Client";
-                  const propertyName =
-                    a.property?.name || a.property?.title || "Property";
-                  return (
-                    <li key={a.id || a._id} className="py-3">
-                      <p className="font-medium">{userName}</p>
-                      <p className="text-gray-500 text-sm">
-                        {a.msg || `${propertyName}`}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {new Date(a.date).toLocaleDateString()} ({a.time?.from}{" "}
-                        - {a.time?.to})
-                      </p>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="text-gray-500">No appointments yet.</p>
-            )}
-          </div>
-        </section>
-
-        {/* Reviews with property select */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">Property Reviews</h2>
-          </div>
-
-          <div className="mb-4">
-            <select
-              value={selectedPropertyId}
-              onChange={(e) => setSelectedPropertyId(e.target.value)}
-              className="border border-gray-300 rounded-lg p-2 w-full max-w-sm focus:ring-2 focus:ring-blue-400"
+        {/* Appointments + Reviews */}
+        <section className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Recent Appointments */}
+            <div
+              className={`rounded-2xl shadow p-5 transition-colors duration-300 ${
+                theme === "dark" ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
+              }`}
             >
-              <option value="">Select a property</option>
-              {properties.map((p) => {
-                const id = p.id || p._id;
-                return (
-                  <option key={id} value={id}>
-                    {p.name || p.title || `Property ${id.slice(0, 6)}`}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xl font-bold">Recent Appointments</h2>
+              </div>
 
-          <div className="bg-white rounded-lg shadow p-4 min-h-[120px]">
-            {loadingReviews ? (
-              <ReviewsSkeleton />
-            ) : reviews.length > 0 ? (
-              <ul className="divide-y divide-gray-200">
-                {reviews.map((r) => (
-                  <li key={r.id || r._id} className="py-3">
-                    <p className="font-medium">
-                      {r.user?.full_name || r.reviewer_name || "Anonymous"}
-                    </p>
-                    <p className="text-gray-700">
-                      {r.text || r.comment || "No comment"}
-                    </p>
-                    <p className="text-sm text-gray-400 mt-1">
-                      <strong>Date Created:</strong> {r.created_at ?? "N/A"}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            ) : selectedPropertyId ? (
-              <p className="text-gray-500">No reviews for this property yet.</p>
-            ) : (
-              <p className="text-gray-500">
-                Select a property to view its reviews.
-              </p>
-            )}
+              {loadingAppts ? (
+                <div className="space-y-3">
+                  {[...Array(4)].map((_, i) => (
+                    <div
+                      key={i}
+                      className={`p-3 rounded animate-pulse h-16 ${
+                        theme === "dark" ? "bg-gray-700" : "bg-gray-200"
+                      }`}
+                    />
+                  ))}
+                </div>
+              ) : appointments.length > 0 ? (
+                <ul className="divide-y divide-gray-200">
+                  {appointments.slice(0, 6).map((a) => {
+                    const userName = a.user?.full_name || a.user?.name || "Client";
+                    const propertyName = a.property?.name || a.property?.title || "Property";
+                    return (
+                      <li key={a.id || a._id} className="py-3">
+                        <p className="font-medium">{userName}</p>
+                        <p className="text-gray-500 text-sm">{a.msg || propertyName}</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {new Date(a.date).toLocaleDateString()} ({a.time?.from} - {a.time?.to})
+                        </p>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className={`${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
+                  No appointments yet.
+                </p>
+              )}
+            </div>
+
+            {/* Property Reviews */}
+            <div
+              className={`rounded-2xl shadow p-5 transition-colors duration-300 ${
+                theme === "dark" ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
+              }`}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xl font-bold">Property Reviews</h2>
+              </div>
+
+              <div className="mb-4">
+                <select
+                  value={selectedPropertyId}
+                  onChange={(e) => setSelectedPropertyId(e.target.value)}
+                  className={`border rounded-lg p-2 w-full max-w-sm focus:ring-2 transition-colors ${
+                    theme === "dark"
+                      ? "bg-gray-700 border-gray-600 text-gray-100 focus:ring-blue-400"
+                      : "bg-white border-gray-300 text-gray-900 focus:ring-blue-400"
+                  }`}
+                >
+                  <option value="">Select a property</option>
+                  {properties.map((p) => {
+                    const id = p.id || p._id;
+                    return (
+                      <option key={id} value={id}>
+                        {p.name || p.title || `Property ${id.slice(0, 6)}`}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              <div className="min-h-[120px]">
+                {loadingReviews ? (
+                  <ReviewsSkeleton />
+                ) : reviews.length > 0 ? (
+                  <ul className="divide-y divide-gray-200">
+                    {reviews.map((r) => (
+                      <li key={r.id || r._id} className="py-3">
+                        <p className="font-medium">
+                          {r.user?.full_name || r.reviewer_name || "Anonymous"}
+                        </p>
+                        <p className={`${theme === "dark" ? "text-gray-200" : "text-gray-700"}`}>
+                          {r.text || r.comment || "No comment"}
+                        </p>
+                        <p className="text-sm text-gray-400 mt-1">
+                          <strong>Date Created:</strong> {r.created_at ?? "N/A"}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                ) : selectedPropertyId ? (
+                  <p className={`${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
+                    No reviews for this property yet.
+                  </p>
+                ) : (
+                  <p className={`${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
+                    Select a property to view its reviews.
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         </section>
       </div>
     </div>
   );
 }
+
 function DashboardCard({ title, value, icon, color, theme }) {
   return (
     <div
       className={`flex justify-between items-center p-5 rounded-xl shadow-md transition-shadow duration-300 ${
-        theme === "dark"
-          ? "bg-gray-800 text-gray-100"
-          : "bg-gray-50 text-gray-900"
+        theme === "dark" ? "bg-gray-800 text-gray-100" : "bg-gray-50 text-gray-900"
       }`}
     >
       <div>
-        <p
-          className={`text-sm ${
-            theme === "dark" ? "text-gray-300" : "text-gray-500"
-          }`}
-        >
+        <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-500"}`}>
           {title}
         </p>
-
         <h3 className="text-2xl md:text-3xl font-bold mt-1">{value}</h3>
       </div>
-      <div
-        className={`p-3 rounded-lg flex items-center justify-center text-2xl ${color} shadow-sm`}
-      >
+      <div className={`p-3 rounded-lg flex items-center justify-center text-2xl ${color} shadow-sm`}>
         {icon}
       </div>
     </div>

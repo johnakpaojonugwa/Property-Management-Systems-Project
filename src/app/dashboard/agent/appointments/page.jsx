@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
 import axios from "axios";
-import { toast } from "react-toastify"
+import { toast } from "react-toastify";
 import AppointmentSkeleton from "@/components/AppointmentLoader";
 
 export default function AgentAppointments() {
-  const { agentToken, agent, BASE_URL } = useApp();
+  const { agentToken, agent, BASE_URL, theme } = useApp();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +25,7 @@ export default function AgentAppointments() {
           { headers: { Authorization: `Bearer ${agentToken}` } }
         );
         setAppointments(res.data?.data || []);
-        console.log("appt data:", res.data?.data)
+        console.log("appt data:", res.data?.data);
       } catch (err) {
         console.log(err);
         toast.error("Failed to fetch appointments");
@@ -68,20 +68,38 @@ export default function AgentAppointments() {
     }
   };
 
-  if (loading) (
-    <AppointmentSkeleton />
-  )
+  if (loading) <AppointmentSkeleton />;
 
   return (
-    <div className="p-6 space-y-8">
-      <h2 className="text-3xl font-semibold text-center text-gray-800">
-        Agent Appointments
-      </h2>
+    <div
+      className={`p-6 space-y-8 ${
+        theme === "dark"
+          ? "bg-gray-800 text-gray-100"
+          : "bg-white text-gray-900"
+      }`}
+    >
+      <h2 className="text-3xl font-bold text-left">Agent Appointments</h2>
 
       {/* Appointment Table */}
-      <div className="overflow-x-auto bg-white rounded-2xl shadow-md border border-gray-100">
-        <table className="min-w-full text-sm text-gray-700">
-          <thead className="bg-gray-50 text-gray-600 text-left">
+      <div
+        className={`overflow-x-auto rounded-2xl shadow-md border 
+    ${theme === "dark" ? "border-gray-700" : "border-gray-200"}
+  `}
+      >
+        <table
+          className={`min-w-full text-sm 
+      ${theme === "dark" ? "text-gray-200" : "text-gray-700"}
+    `}
+        >
+          <thead
+            className={`text-left 
+        ${
+          theme === "dark"
+            ? "bg-gray-700 text-gray-300"
+            : "bg-gray-50 text-gray-600"
+        }
+      `}
+          >
             <tr>
               <th className="px-6 py-3 font-medium">Property</th>
               <th className="px-6 py-3 font-medium">Client</th>
@@ -91,37 +109,56 @@ export default function AgentAppointments() {
               <th className="px-6 py-3 font-medium">Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {appointments.map((appt, i) => (
               <tr
                 key={appt.id}
-                className={`border-t ${
-                  i % 2 === 0 ? "bg-white" : "bg-gray-50"
-                }`}
+                className={`
+            border-t 
+            ${theme === "dark" ? "border-gray-700" : "border-gray-200"}
+            ${
+              i % 2 === 0
+                ? theme === "dark"
+                  ? "bg-gray-800"
+                  : "bg-white"
+                : theme === "dark"
+                ? "bg-gray-700"
+                : "bg-gray-50"
+            }
+          `}
               >
                 <td className="px-6 py-3">{appt.property?.name || "-"}</td>
+
                 <td className="px-6 py-3">
                   {appt.user?.full_name} {appt.user?.last_name}
                 </td>
+
                 <td className="px-6 py-3">
                   {new Date(appt.date).toLocaleDateString()}
                 </td>
+
                 <td className="px-6 py-3">
                   {appt.time?.from} - {appt.time?.to}
                 </td>
+
                 <td className="px-6 py-3">{appt.user.id || "-"}</td>
+
                 <td className="px-6 py-3 space-x-2">
                   <button
                     onClick={() => handleConfirm(appt.id)}
                     disabled={appt.confirmed}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-xl text-white transition ${
-                      appt.confirmed
-                        ? "bg-green-400 cursor-not-allowed"
-                        : "bg-green-600 hover:bg-green-700"
-                    }`}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-xl text-white transition
+                ${
+                  appt.confirmed
+                    ? "bg-green-400 cursor-not-allowed"
+                    : "bg-green-600 hover:bg-green-700"
+                }
+              `}
                   >
                     {appt.confirmed ? "Confirmed" : "Confirm"}
                   </button>
+
                   <button
                     onClick={() => handleDelete(appt.id)}
                     className="px-3 py-1.5 text-xs font-medium rounded-xl bg-red-500 hover:bg-red-600 text-white transition"
@@ -131,9 +168,15 @@ export default function AgentAppointments() {
                 </td>
               </tr>
             ))}
+
             {appointments.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-center py-6 text-gray-500">
+                <td
+                  colSpan={6}
+                  className={`text-center py-6 
+              ${theme === "dark" ? "text-gray-400" : "text-gray-500"}
+            `}
+                >
                   No appointments found
                 </td>
               </tr>
@@ -144,8 +187,6 @@ export default function AgentAppointments() {
     </div>
   );
 }
-
-
 
 // "use client";
 

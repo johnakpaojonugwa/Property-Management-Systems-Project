@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import Image from "next/image";
 
 export default function AgentProfile() {
-  const { agentToken, agent, merchantToken, BASE_URL } = useApp();
+  const { agentToken, agent, merchantToken, BASE_URL, theme } = useApp();
 
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -29,12 +29,8 @@ export default function AgentProfile() {
 
         while (morePages && !foundAgent) {
           const res = await fetch(
-            `${BASE_URL}/merchants/agents?offset=${
-              page * limit
-            }&limit=${limit}`,
-            {
-              headers: { Authorization: `Bearer ${merchantToken}` },
-            }
+            `${BASE_URL}/merchants/agents?offset=${page * limit}&limit=${limit}`,
+            { headers: { Authorization: `Bearer ${merchantToken}` } }
           );
 
           const data = await res.json();
@@ -47,7 +43,7 @@ export default function AgentProfile() {
 
         if (!foundAgent) throw new Error("Agent not found");
         setAgentData(foundAgent);
-        console.log("AgentData:", foundAgent)
+        console.log("AgentData:", foundAgent);
       } catch (err) {
         toast.error(err.message);
       } finally {
@@ -90,16 +86,48 @@ export default function AgentProfile() {
   // Skeleton loader
   if (loading) {
     return (
-      <div className="p-6 max-w-3xl mx-auto animate-pulse">
-        <div className="h-6 bg-gray-200 rounded w-1/3 mb-6"></div>
-        <div className="bg-white shadow-md rounded-xl p-6 border border-gray-100">
+      <div
+        className={`p-6 max-w-3xl mx-auto animate-pulse ${
+          theme === "dark" ? "bg-gray-900" : "bg-slate-100"
+        }`}
+      >
+        <div
+          className={`h-6 rounded w-1/3 mb-6 ${
+            theme === "dark" ? "bg-gray-700" : "bg-gray-200"
+          }`}
+        ></div>
+        <div
+          className={`shadow-md rounded-xl p-6 border ${
+            theme === "dark" ? "border-gray-700 bg-gray-800" : "border-gray-100 bg-white"
+          }`}
+        >
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-            <div className="rounded-full bg-gray-200 w-32 h-32"></div>
+            <div
+              className={`rounded-full w-32 h-32 ${
+                theme === "dark" ? "bg-gray-700" : "bg-gray-200"
+              }`}
+            ></div>
             <div className="flex-1 space-y-3 w-full">
-              <div className="h-5 bg-gray-200 rounded w-1/2"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-              <div className="h-6 bg-gray-200 rounded w-2/4 mt-2"></div>
+              <div
+                className={`h-5 rounded w-1/2 ${
+                  theme === "dark" ? "bg-gray-700" : "bg-gray-200"
+                }`}
+              ></div>
+              <div
+                className={`h-4 rounded w-3/4 ${
+                  theme === "dark" ? "bg-gray-700" : "bg-gray-200"
+                }`}
+              ></div>
+              <div
+                className={`h-4 rounded w-1/3 ${
+                  theme === "dark" ? "bg-gray-700" : "bg-gray-200"
+                }`}
+              ></div>
+              <div
+                className={`h-6 rounded w-2/4 mt-2 ${
+                  theme === "dark" ? "bg-gray-700" : "bg-gray-200"
+                }`}
+              ></div>
             </div>
           </div>
         </div>
@@ -110,7 +138,11 @@ export default function AgentProfile() {
   // No agent found
   if (!agentData) {
     return (
-      <div className="p-8 text-center text-gray-500">
+      <div
+        className={`p-8 text-center ${
+          theme === "dark" ? "text-gray-400" : "text-gray-500"
+        }`}
+      >
         No agent information found. Please log in again.
       </div>
     );
@@ -118,12 +150,18 @@ export default function AgentProfile() {
 
   // Loaded view
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-semibold mb-6 text-center sm:text-left">
-        Agent Profile
-      </h1>
+    <div
+      className={`p-6 max-w-3xl mx-auto ${
+        theme === "dark" ? "bg-gray-900 text-gray-100" : "bg-slate-100 text-gray-900"
+      }`}
+    >
+      <h1 className="text-2xl font-bold mb-6 text-left sm:text-left">Agent Profile</h1>
 
-      <div className="bg-white shadow-md rounded-xl p-6 border border-gray-100">
+      <div
+        className={`shadow-md rounded-xl p-6 border ${
+          theme === "dark" ? "border-gray-700 bg-gray-800" : "border-gray-100 bg-white"
+        }`}
+      >
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           <div className="relative">
             <Image
@@ -149,37 +187,55 @@ export default function AgentProfile() {
           </div>
 
           <div className="text-center sm:text-left">
-            <h2 className="text-xl font-semibold">
-              {agentData?.full_name || "Agent Name"}
-            </h2>
-            <p className="text-gray-500">{agentData?.email}</p>
-            <p className="mt-2 inline-block px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">
+            <h2 className="text-xl font-semibold">{agentData?.full_name || "Agent Name"}</h2>
+            <p className={theme === "dark" ? "text-gray-300" : "text-gray-500"}>
+              {agentData?.email}
+            </p>
+            <p
+              className={`mt-2 inline-block px-3 py-1 rounded-full text-xs ${
+                theme === "dark" ? "bg-yellow-600 text-gray-100" : "bg-yellow-100 text-yellow-700"
+              }`}
+            >
               Agent Role: {agent?.role}
             </p>
           </div>
         </div>
 
         {uploading && (
-          <p className="text-blue-600 text-sm mt-3 animate-pulse">
+          <p
+            className={`text-sm mt-3 animate-pulse ${
+              theme === "dark" ? "text-blue-400" : "text-blue-600"
+            }`}
+          >
             Uploading image...
           </p>
         )}
 
-        <div className="mt-6 space-y-3 text-gray-700">
+        <div className="mt-6 space-y-3">
           <p>
-            <strong>Company:</strong> {agentData?.company || "Not provided"}
+            <strong>Company:</strong>{" "}
+            <span className={theme === "dark" ? "text-gray-200" : "text-gray-700"}>
+              {agentData?.company || "Not provided"}
+            </span>
           </p>
           <p>
-            <strong>Agent ID:</strong> {agentData?.id || "—"}
+            <strong>Agent ID:</strong>{" "}
+            <span className={theme === "dark" ? "text-gray-200" : "text-gray-700"}>
+              {agentData?.id || "—"}
+            </span>
           </p>
-          <p className=" ">
+          <p>
             <strong>Status:</strong>{" "}
             <span
-              className={`font-semibold px-3 py-1 text-xs bg-green-500 w-30 text-white ${
+              className={`font-semibold px-3 py-1 text-xs ${
                 agentData?.is_verified
-                  ? "text-green-600 uppercase"
-                  : "text-yellow-600"
-              }`}
+                  ? theme === "dark"
+                    ? "bg-green-600 text-gray-100"
+                    : "bg-green-500 text-white"
+                  : theme === "dark"
+                  ? "bg-yellow-500 text-gray-100"
+                  : "bg-yellow-200 text-yellow-800"
+              } rounded`}
             >
               {agentData.is_verified ? "Verified" : "Pending Verification"}
             </span>
